@@ -17,3 +17,10 @@ histfile = glob.glob(histfile_tmp)[0]
 recfile_tmp = os.path.join(recpath, "produkt_klima_tag_*")
 recfile_tmp += str(stationnumber).zfill(5)+'.txt'
 recfile = glob.glob(recfile_tmp)[0]
+
+
+histdata = pd.read_table(histfile, sep=";", low_memory=False)
+recentdata = pd.read_table(recfile, sep=";", low_memory=False)
+merged=pd.concat([hist,recent])
+
+merged.replace(-999, np.nan, regex=True)
