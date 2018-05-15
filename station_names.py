@@ -6,7 +6,7 @@ import pickle
 def get_station_names():
     """ Return a dictonary containing the station ID's
     as keys and the list [Stations_id, von_datum, bis_datum, Stationshoehe,
-    geoBreite, geoLaenge, Stationsname, Bundesland] as value.
+    geoBreite, geoLaenge, Stationsname, Bundesland] and these column names in a list as value.
     """
 
     class Station:
@@ -40,14 +40,19 @@ def get_station_names():
 
     for lineid, line in enumerate(fileorigin):
         if lineid > 1:
-            line_vec = list(filter(None,line.split(' ')))
+            line_vec = list(filter(None, line.split(' ')))
             Stations[line_vec[0]] = Station(line_vec[0],line_vec[1], line_vec[2], line_vec[3],
                                 line_vec[4], line_vec[5], line_vec[6:-1], line_vec[-1])
             stations_dict[Stations[line_vec[0]].Stations_id] = [Stations[line_vec[0]].von_datum,
             Stations[line_vec[0]].bis_datum, Stations[line_vec[0]].Stationshoehe,
             Stations[line_vec[0]].geoBreite, Stations[line_vec[0]].geoLaenge,
             Stations[line_vec[0]].Stationsname, Stations[line_vec[0]].Bundesland]
-    print("number of stations loaded: ",len(Stations))
+
+        elif lineid == 0:
+            column_names = list(filter(None, line.split(' ')))
+            column_names = [c.strip().lower() for c in column_names]
+
+    print("number of stations loaded: ", len(Stations))
     fileorigin.close()
 
     # Join town names that are made up of multiple strings
@@ -62,7 +67,7 @@ def get_station_names():
             stations_dict[key][6] = stations_dict[key][5][1]
             stations_dict[key][5] = stations_dict[key][5][0]
 
-    return stations_dict
+    return stations_dict, column_names
 
 
 if __name__ == '__main__':
