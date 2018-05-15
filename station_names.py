@@ -40,4 +40,13 @@ for lineid, line in enumerate(fileorigin):
 print("number of stations loaded: ",len(Stations))
 fileorigin.close()
 
+#print(dict)
+
+# Make all names completely readable and in one thing
+for key in dict:
+    if len(dict[key]) > 2:
+        town_name = dict[key][0:-1]
+        land_name = dict[key][-1]
+        joint_name = " ".join(town_name)
+        dict[key] = [joint_name, land_name]
 print(dict)
