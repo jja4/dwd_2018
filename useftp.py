@@ -21,7 +21,9 @@ def download_data(userpath):
             file.close()
 
     filenames = ftp.nlst('pub/CDC//observations_germany/climate/daily/kl/recent')
-    os.makedirs(os.path.join(userpath,'pub/CDC/observations_germany/climate/daily/kl/recent/'))
+    
+    if not os.path.isdir(os.path.join(userpath,'pub/CDC/observations_germany/climate/daily/kl/recent/')):
+        os.makedirs(os.path.join(userpath,'pub/CDC/observations_germany/climate/daily/kl/recent/'))
 
     for filename in filenames:
         local_filename = os.path.join(userpath, filename)
