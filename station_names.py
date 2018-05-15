@@ -12,8 +12,6 @@ class Station:
         self.geola = geola
         self.name = name
         self.land = land
-    def get_GPS(self):
-        return np.array([self.geobr, self.geola]).astype('float')
 
 # Download the file from the internet
 server = "ftp-cdc.dwd.de"
@@ -40,9 +38,8 @@ for lineid, line in enumerate(fileorigin):
 print("number of stations loaded: ",len(Stations))
 fileorigin.close()
 
-#print(dict)
 
-# Make all names completely readable and in one thing
+# Join town names that are made up of multiple strings
 for key in dict:
     if len(dict[key]) > 2:
         town_name = dict[key][0:-1]
