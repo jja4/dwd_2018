@@ -28,6 +28,6 @@ if __name__ == '__main__':
         print("get_data has 1 parameter: path to the folder, where the data will be downloaded")
         print("----------python get_data.py your_path")
     else:
-        command = sys.argv[1]
-        print(command)
-        get_data(command)
+        path = sys.argv[1]
+        print("will save data into {}".format(path))
+        get_data(path)
