@@ -5,7 +5,8 @@ import pickle
 
 def get_station_names():
     """ This function produces a pickled dictonary containing the station ID's
-    as keys and a list of ['town name', 'Bundesland name']
+    as keys and the list [Stations_id, von_datum, bis_datum, Stationshoehe,
+    geoBreite, geoLaenge, Stationsname, Bundesland] as value.
     """
 
     class Station:
@@ -58,7 +59,4 @@ def get_station_names():
             dict[key][5] = joint_name
             dict[key][6] = land_name
 
-    print(dict)
     pickle.dump(dict, open("stations.p", "wb"))
-
-get_station_names()
