@@ -3,6 +3,15 @@ import os
 
 server = "ftp-cdc.dwd.de"
 
+def download_folder(ftp, userpath,foldername):
+    filenames = ftp.nlst(foldername)
+    for filename in filenames:
+            local_filename = os.path.join(userpath, filename)
+            file = open(local_filename, 'wb')
+            ftp.retrbinary('RETR '+ filename, file.write)
+            file.close()
+
+
 def download_data(userpath):
 
     ftp = FTP(server)
@@ -11,22 +20,27 @@ def download_data(userpath):
     # get historical data, if it isn't already stored
     histpath = os.path.join(userpath,'pub/CDC/observations_germany/climate/daily/kl/historical/')
     if not os.path.isdir(histpath):
-        filenames = ftp.nlst('pub/CDC//observations_germany/climate/daily/kl/historical')
         os.makedirs(histpath)
+        download_folder(ftp, userpath,'pub/CDC//observations_germany/climate/daily/kl/historical')
 
-        for filename in filenames:
-            local_filename = os.path.join(userpath, filename)
-            file = open(local_filename, 'wb')
-            ftp.retrbinary('RETR '+ filename, file.write)
-            file.close()
+    # get recent data
+    recentpath = os.path.join(userpath,'pub/CDC/observations_germany/climate/daily/kl/recent/')
+    if not os.path.isdir(recentpath):
+        os.makedirs(recentpath)
+    download_folder(ftp, userpath, 'pub/CDC//observations_germany/climate/daily/kl/recent')
 
-    filenames = ftp.nlst('pub/CDC//observations_germany/climate/daily/kl/recent')
-    
-    if not os.path.isdir(os.path.join(userpath,'pub/CDC/observations_germany/climate/daily/kl/recent/')):
-        os.makedirs(os.path.join(userpath,'pub/CDC/observations_germany/climate/daily/kl/recent/'))
+    # get hourly data
+    hour_folders = ["air_temperature", "cloud_type", "precipitation", "pressure", "soil_temperature", "solar", "sun", "visibility", "wind"]
+    for folder in hour_folders:
+        hourpath = os.path.join('pub/CDC//observations_germany/climate/hourly/', folder)
 
-    for filename in filenames:
-        local_filename = os.path.join(userpath, filename)
-        file = open(local_filename, 'wb')
-        ftp.retrbinary('RETR '+ filename, file.write)
-        file.close()
+        hourpath_hist = os.path.join(userpath, hourpath, 'historical')
+        hourpath_recent = os.path.join(userpath, hourpath, 'recent')
+
+        if not os.path.isdir(hourpath_hist):
+            os.makedirs(hourpath_hist)
+            download_folder(ftp, userpath, hourpath+'/historical')
+
+        if not os.path.isdir(hourpath_recent):
+            os.makedirs(hourpath_recent)
+        download_folder(ftp, userpath, hourpath+'/recent')
