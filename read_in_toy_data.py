@@ -1,10 +1,6 @@
 import numpy as np
-import folium
-import webbrowser
 import os
 from ftplib import FTP
-from folium.plugins import MarkerCluster
-from folium.plugins import FastMarkerCluster
 
 class Station:
     def __init__(self, id, von, bis, height, geobr, geola, name, land):
