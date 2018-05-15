@@ -4,7 +4,7 @@ from ftplib import FTP
 import pickle
 
 def get_station_names():
-    """ This function produces a pickled dictonary containing the station ID's
+    """ Return a dictonary containing the station ID's
     as keys and the list [Stations_id, von_datum, bis_datum, Stationshoehe,
     geoBreite, geoLaenge, Stationsname, Bundesland] as value.
     """
@@ -62,5 +62,9 @@ def get_station_names():
             stations_dict[key][6] = stations_dict[key][5][1]
             stations_dict[key][5] = stations_dict[key][5][0]
 
+    return stations_dict
 
+
+if __name__ == '__main__':
+    stations_dict = get_station_names()
     pickle.dump(stations_dict, open("stations.p", "wb"))
