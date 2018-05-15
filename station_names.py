@@ -1,6 +1,7 @@
 import numpy as np
 import os
 from ftplib import FTP
+import pickle
 
 class Station:
     def __init__(self, id, von, bis, height, geobr, geola, name, land):
@@ -46,4 +47,5 @@ for key in dict:
         land_name = dict[key][-1]
         joint_name = " ".join(town_name)
         dict[key] = [joint_name, land_name]
-print(dict)
+
+station_names = pickle.dump(dict, open("stations.p", "wb"))
