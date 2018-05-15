@@ -58,5 +58,9 @@ def get_station_names():
             joint_name = " ".join(town_name)
             dict[key][5] = joint_name
             dict[key][6] = land_name
+        else:
+            dict[key][6] = dict[key][5][1]
+            dict[key][5] = dict[key][5][0]
+
 
     pickle.dump(dict, open("stations.p", "wb"))
