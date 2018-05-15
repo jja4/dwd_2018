@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import os
 import glob
-import datetime
 
 
 def process_data(userpath,stationnumber,time_interval):
@@ -35,8 +34,6 @@ def clean_merged(merged):
     merged_clean = merged_clean.drop(['eor'],axis=1)
     merged_clean.columns = [c.lower() for c in merged_clean.columns]
 
-    def int_to_date(x):
-        return datetime.datetime.strptime(str(x), '%Y%m%d').date()
-    merged_clean['mess_datum'] = merged_clean['mess_datum'].apply(int_to_date)
+    merged_clean['mess_datum'] = pd.to_datetime(merged_clean['mess_datum'].apply(str))
 
     return merged_clean
