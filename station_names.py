@@ -2,7 +2,6 @@ import numpy as np
 import os
 from ftplib import FTP
 import pickle
-import datetime
 import pandas as pd
 
 def get_station_names():
@@ -76,16 +75,13 @@ def get_stations_dataframe():
 
     stations_dict, column_names = get_station_names()
 
-    def int_to_date(x):
-        return datetime.datetime.strptime(str(x), '%Y%m%d').date()
-
     stations_pd = pd.DataFrame.from_dict(stations_dict, orient = 'index')
     stations_pd = stations_pd.reset_index()
     stations_pd.set_axis(column_names, axis = 'columns', inplace = True)
     stations_pd['stations_id'] = stations_pd['stations_id'].apply(int)
     stations_pd = stations_pd.set_index('stations_id')
-    stations_pd['von_datum'] = stations_pd['von_datum'].apply(int_to_date)
-    stations_pd['bis_datum'] = stations_pd['bis_datum'].apply(int_to_date)
+    stations_pd['von_datum'] = pd.to_datetime(stations_pd['von_datum'])
+    stations_pd['bis_datum'] = pd.to_datetime(stations_pd['bis_datum'])
 
     return stations_pd
 
