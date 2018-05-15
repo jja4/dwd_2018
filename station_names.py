@@ -53,4 +53,4 @@ def get_station_names():
             joint_name = " ".join(town_name)
             dict[key] = [joint_name, land_name]
 
-    station_names = pickle.dump(dict, open("stations.p", "wb"))
+    pickle.dump(dict, open("stations.p", "wb"))
