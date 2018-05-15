@@ -30,10 +30,10 @@ def download_data(userpath):
     download_folder(ftp, userpath, 'pub/CDC//observations_germany/climate/daily/kl/recent')
 
     # get hourly data
-    hour_folders = ["air_temperature", "cloud_type", "precipitation", "pressure", "soil_temperature", "solar", "sun", "visibility", "wind"]
+    hour_folders = ["air_temperature", "cloud_type", "precipitation", "pressure", "soil_temperature", "sun", "visibility", "wind"]
     for folder in hour_folders:
         hourpath = os.path.join('pub/CDC//observations_germany/climate/hourly/', folder)
-
+        print(hourpath)
         hourpath_hist = os.path.join(userpath, hourpath, 'historical')
         hourpath_recent = os.path.join(userpath, hourpath, 'recent')
 
@@ -44,3 +44,8 @@ def download_data(userpath):
         if not os.path.isdir(hourpath_recent):
             os.makedirs(hourpath_recent)
         download_folder(ftp, userpath, hourpath+'/recent')
+
+    solarpath = 'pub/CDC//observations_germany/climate/hourly/solar'
+    if not os.path.isdir(solarpath)
+        os.makedirs(solarpath)
+    download_folder(ftp, userpath, solarpath)
