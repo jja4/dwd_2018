@@ -3,7 +3,7 @@ import os, sys
 
 server = "ftp-cdc.dwd.de"
 
-def download_folder(ftp, userpath,foldername, VERBOSE = True):
+def download_folder(ftp, userpath,foldername, verbose = True):
     filenames = ftp.nlst(foldername)
     k = 0 #percentage downloade counter
     for i, filename in enumerate(filenames):
@@ -11,7 +11,7 @@ def download_folder(ftp, userpath,foldername, VERBOSE = True):
         file = open(local_filename, 'wb')
         ftp.retrbinary('RETR '+ filename, file.write)
         file.close()
-        if VERBOSE:
+        if verbose:
             # what this actually does is to overwrite the last printout that was the statusbar
             # the ljust method pads the string with whitespaces, this is needed to remove
             # the previous statusbar
@@ -23,58 +23,58 @@ def download_folder(ftp, userpath,foldername, VERBOSE = True):
         if i%int(len(filenames)/100)==0: #update status every 1%
             k+=1
 
-def download_data(userpath, historical=True, recent=True, hourly=True, VERBOSE = True):
+def download_data(userpath, historical=True, recent=True, hourly=True, verbose = True):
     ftp = FTP(server)
     ftp.login()
-    if VERBOSE: print("logged in to server {}".format(server))
+    if verbose: print("logged in to server {}".format(server))
     if historical:
-        if VERBOSE: print("gonna get historical data")
-        get_historical_data(userpath)
+        if verbose: print("gonna get historical data")
+        get_historical_data(userpath,ftp)
     if recent:
-        if VERBOSE: print("gonna get recent data")
-        get_recent_data(userpath)
+        if verbose: print("gonna get recent data")
+        get_recent_data(userpath,ftp)
     if hourly:
-        if VERBOSE: print("gonna get hourly data")
-        get_hourly_data(userpath)
+        if verbose: print("gonna get hourly data")
+        get_hourly_data(userpath,ftp)
 
-def get_historical_data(userpath,VERBOSE=True):
+def get_historical_data(userpath,ftp,verbose=True):
     histpath = os.path.join(userpath,'pub/CDC/observations_germany/climate/daily/kl/historical/')
-    if VERBOSE: print('directory for historical data: {}'.format(histpath))
+    if verbose: print('directory for historical data: {}'.format(histpath))
     if not os.path.isdir(histpath):
-        if VERBOSE: print("directory did not exist, it will be created")
+        if verbose: print("directory did not exist, it will be created")
         os.makedirs(histpath)
-        download_folder(ftp, userpath,'pub/CDC//observations_germany/climate/daily/kl/historical', VERBOSE=VERBOSE)
+        download_folder(ftp, userpath,'pub/CDC//observations_germany/climate/daily/kl/historical', verbose=verbose)
 
-def get_recent_data(userpath,VERBOSE=True):
+def get_recent_data(userpath,ftp,verbose=True):
     recentpath = os.path.join(userpath,'pub/CDC/observations_germany/climate/daily/kl/recent/')
-    if VERBOSE: print("directory for recent data: {}".format(recentpath))
+    if verbose: print("directory for recent data: {}".format(recentpath))
     if not os.path.isdir(recentpath):
-        if VERBOSE: print("directory did not exist, it will be created")
+        if verbose: print("directory did not exist, it will be created")
         os.makedirs(recentpath)
-    download_folder(ftp, userpath, 'pub/CDC//observations_germany/climate/daily/kl/recent',VERBOSE=VERBOSE)
+    download_folder(ftp, userpath, 'pub/CDC//observations_germany/climate/daily/kl/recent',verbose=verbose)
 
-def get_hourly_data(userpath,VERBOSE=True):
+def get_hourly_data(userpath,ftp,verbose=True):
     hour_folders = ["air_temperature", "cloud_type", "precipitation", "pressure", "soil_temperature", "sun", "visibility", "wind"]
-    if VERBOSE: print("will now download hourly predictions")
+    if verbose: print("will now download hourly predictions")
     for folder in hour_folders:
-        if VERBOSE: print("now downloading {}".format(folder))
+        if verbose: print("now downloading {}".format(folder))
         hourpath = os.path.join('pub/CDC//observations_germany/climate/hourly/', folder)
-        if VERBOSE: print("the data will be saved in {}".format(hourpath))
+        if verbose: print("the data will be saved in {}".format(hourpath))
         hourpath_hist = os.path.join(userpath, hourpath, 'historical')
         hourpath_recent = os.path.join(userpath, hourpath, 'recent')
 
         if not os.path.isdir(hourpath_hist):
-            if VERBOSE: print("downloading historical hourly data")
+            if verbose: print("downloading historical hourly data")
             os.makedirs(hourpath_hist)
-            download_folder(ftp, userpath, hourpath+'/historical',VERBOSE=VERBOSE)
+            download_folder(ftp, userpath, hourpath+'/historical',verbose=verbose)
 
         if not os.path.isdir(hourpath_recent):
-            if VERBOSE: print("downloading recent hourly data")
+            if verbose: print("downloading recent hourly data")
             os.makedirs(hourpath_recent)
-        download_folder(ftp, userpath, hourpath+'/recent',VERBOSE=VERBOSE)
+        download_folder(ftp, userpath, hourpath+'/recent',verbose=verbose)
 
     solarpath = 'pub/CDC//observations_germany/climate/hourly/solar'
-    if VERBOSE: print("now downloading solar hourly data into {}".format(solarpath))
+    if verbose: print("now downloading solar hourly data into {}".format(solarpath))
     if not os.path.isdir(solarpath):
         os.makedirs(solarpath)
-    download_folder(ftp, userpath, solarpath,VERBOSE=VERBOSE)
+    download_folder(ftp, userpath, solarpath,verbose=verbose)
