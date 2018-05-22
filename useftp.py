@@ -23,13 +23,21 @@ def download_folder(ftp, userpath,foldername, VERBOSE = True):
         if i%int(len(filenames)/100)==0: #update status every 1%
             k+=1
 
-def download_data(userpath, VERBOSE = True):
-
+def download_data(userpath, historical=True, recent=True, hourly=True, VERBOSE = True):
     ftp = FTP(server)
     ftp.login()
     if VERBOSE: print("logged in to server {}".format(server))
+    if historical:
+        if VERBOSE: print("gonna get historical data")
+        get_historical_data(userpath)
+    if recent:
+        if VERBOSE: print("gonna get recent data")
+        get_recent_data(userpath)
+    if hourly:
+        if VERBOSE: print("gonna get hourly data")
+        get_hourly_data(userpath)
 
-    # get historical data, if it isn't already stored
+def get_historical_data(userpath,VERBOSE=True):
     histpath = os.path.join(userpath,'pub/CDC/observations_germany/climate/daily/kl/historical/')
     if VERBOSE: print('directory for historical data: {}'.format(histpath))
     if not os.path.isdir(histpath):
@@ -37,7 +45,7 @@ def download_data(userpath, VERBOSE = True):
         os.makedirs(histpath)
         download_folder(ftp, userpath,'pub/CDC//observations_germany/climate/daily/kl/historical', VERBOSE=VERBOSE)
 
-    # get recent data
+def get_recent_data(userpath,VERBOSE=True):
     recentpath = os.path.join(userpath,'pub/CDC/observations_germany/climate/daily/kl/recent/')
     if VERBOSE: print("directory for recent data: {}".format(recentpath))
     if not os.path.isdir(recentpath):
@@ -45,7 +53,7 @@ def download_data(userpath, VERBOSE = True):
         os.makedirs(recentpath)
     download_folder(ftp, userpath, 'pub/CDC//observations_germany/climate/daily/kl/recent',VERBOSE=VERBOSE)
 
-    # get hourly data
+def get_hourly_data(userpath,VERBOSE=True):
     hour_folders = ["air_temperature", "cloud_type", "precipitation", "pressure", "soil_temperature", "sun", "visibility", "wind"]
     if VERBOSE: print("will now download hourly predictions")
     for folder in hour_folders:
