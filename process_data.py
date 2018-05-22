@@ -22,14 +22,28 @@ def merge_hisrec_daily(userpath,stationnumber):
 
     recfile_tmp = os.path.join(recpath, "produkt_klima_tag_*")
     recfile_tmp += str(stationnumber).zfill(5)+'.txt'
-    recfile = glob.glob(recfile_tmp)[0]
 
     histdata = pd.read_table(histfile, sep=";", low_memory=False)
-    recentdata = pd.read_table(recfile, sep=";", low_memory=False)
-    merged=pd.concat([histdata,recentdata])
+
+    recfile_list = glob.glob(recfile_tmp)
+
+    if recfile_list:
+
+        recfile = glob.glob(recfile_tmp)[0]
+        recentdata = pd.read_table(recfile, sep=";", low_memory=False)
+        merged=pd.concat([histdata,recentdata])
+
+    else:
+
+        merged = histdata
+                
     return merged
 
 def clean_merged(merged):
     merged_clean = merged.replace(-999, np.nan, regex=True)
     merged_clean = merged_clean.drop(['eor'],axis=1)
+    merged_clean.columns = [c.lower() for c in merged_clean.columns]
+    merged_clean['mess_datum'] = pd.to_datetime(merged_clean['mess_datum'].apply(str))
+    merged_clean = merged_clean.drop_duplicates()
+
     return merged_clean

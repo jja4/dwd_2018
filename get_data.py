@@ -3,10 +3,10 @@ import sys
 from useftp import download_data
 from unzip_all import unzip_folder
 
-def get_data(userpath):
+def get_data(userpath,historical=True,recent=True,hourly=True,VERBOSE=True):
     #download the files
     print("getting data")
-    download_data(userpath)
+    download_data(userpath,historical,recent,hourly,VERBOSE)
 
     #unzip the files
     print("unzipping data")
@@ -20,7 +20,7 @@ def get_data(userpath):
             unzip_folder(os.path.join(localdir, 'historical'))
             unzip_folder(os.path.join(localdir, 'recent'))
         else:
-            unzip_folder(local_dir)
+            unzip_folder(localdir)
 
 
 if __name__ == '__main__':
