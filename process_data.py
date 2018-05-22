@@ -19,20 +19,22 @@ def merge_hisrec_daily(userpath,stationnumber):
     histfile_tmp = os.path.join(histpath, "produkt_klima_tag_*")
     histfile_tmp += str(stationnumber).zfill(5)+'.txt'
     histfile = glob.glob(histfile_tmp)[0]
-    
+
     recfile_tmp = os.path.join(recpath, "produkt_klima_tag_*")
     recfile_tmp += str(stationnumber).zfill(5)+'.txt'
-    
+
     histdata = pd.read_table(histfile, sep=";", low_memory=False)
-    
-    if os.path.isfile(recfile_tmp):
-    
+
+    recfile_list = glob.glob(recfile_tmp)
+
+    if recfile_list:
+
         recfile = glob.glob(recfile_tmp)[0]
         recentdata = pd.read_table(recfile, sep=";", low_memory=False)
         merged=pd.concat([histdata,recentdata])
-        
+
     else:
-    
+
         merged = histdata
                 
     return merged
