@@ -32,7 +32,7 @@ def delete_folder(folder, verbose = True):
         except Exception as e:
             print(e)
     if verbose:
-    print("deleted contents of folder "+folder)
+        print("deleted contents of folder "+folder)
 
 def download_data(userpath, historical=True, recent=True, hourly=True, verbose = True):
     ftp = FTP(server)
