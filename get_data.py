@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os
 import sys
 from useftp import download_data
