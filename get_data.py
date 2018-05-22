@@ -20,7 +20,7 @@ def get_data(userpath,historical,recent,hourly,VERBOSE):
             unzip_folder(os.path.join(localdir, 'historical'))
             unzip_folder(os.path.join(localdir, 'recent'))
         else:
-            unzip_folder(local_dir)
+            unzip_folder(localdir)
 
 
 if __name__ == '__main__':
