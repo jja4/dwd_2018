@@ -20,23 +20,22 @@ def merge_hisrec_daily(userpath,stationnumber):
     histfile_tmp += str(stationnumber).zfill(5)+'.txt'
 
     histlist = glob.glob(histfile_tmp)
-    
+
     if histlist:
         histfile = glob.glob(histfile_tmp)[0]
         histdata = pd.read_table(histfile, sep=";", low_memory=False)
         merged = histdata
-      
+
     recfile_tmp = os.path.join(recpath, "produkt_klima_tag_*")
     recfile_tmp += str(stationnumber).zfill(5)+'.txt'
     reclist = glob.glob(recfile_tmp)
-    
+
     if reclist:
         recfile = glob.glob(recfile_tmp)[0]
         recentdata = pd.read_table(recfile, sep=";", low_memory=False)
         merged = recentdata
         if histlist:
              merged=pd.concat([histdata,recentdata])
-                         
 
     return merged
 
@@ -46,7 +45,6 @@ def merge_hisrec_hourly(userpath,stationnumber):
     for i,folder in enumerate(hour_folders):
         histpath = os.path.join(userpath, 'pub','CDC','observations_germany','climate','hourly', folder, 'historical')
         recpath  = os.path.join(userpath, 'pub','CDC','observations_germany','climate','hourly', folder, 'recent')
-
 
         histfile_tmp = os.path.join(histpath, "stundenwerte*")
         histfile_tmp += str(stationnumber).zfill(5)+'*/produkt*'
@@ -70,7 +68,7 @@ def merge_hisrec_hourly(userpath,stationnumber):
 def clean_merged(merged):
     merged_clean = merged.replace(-999, np.nan, regex=True)
     merged_clean = merged_clean.drop(['eor'],axis=1)
-    merged_clean.columns = [c.lower() for c in merged_clean.columns]
+    merged_clean.columns = [c.strip().lower() for c in merged_clean.columns]
     merged_clean['mess_datum'] = pd.to_datetime(merged_clean['mess_datum'].apply(str))
     merged_clean = merged_clean.drop_duplicates()
 
