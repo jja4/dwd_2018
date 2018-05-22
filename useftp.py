@@ -28,11 +28,11 @@ def delete_folder(folder, verbose = True):
         file_path = os.path.join(folder, file)
         try:
             if os.path.isfile(file_path):
-            os.unlink(file_path)
-            if verbose:
-                print("deleted contents of folder "+folder)
+                os.unlink(file_path)
         except Exception as e:
             print(e)
+    if verbose:
+    print("deleted contents of folder "+folder)
 
 def download_data(userpath, historical=True, recent=True, hourly=True, verbose = True):
     ftp = FTP(server)
