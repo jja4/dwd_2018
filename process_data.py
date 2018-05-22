@@ -16,8 +16,9 @@ def merge_hisrec_daily(userpath,stationnumber):
     histpath = os.path.join(userpath, 'pub','CDC','observations_germany','climate','daily','kl','historical')
     recpath  = os.path.join(userpath, 'pub','CDC','observations_germany','climate','daily','kl','recent')
 
-    histfile_tmp = os.path.join(histpath, "produkt_klima_tag_*")
+    histfile_tmp = os.path.join(histpath, "produkt_klima_tag_*") #list of filenames
     histfile_tmp += str(stationnumber).zfill(5)+'.txt'
+
     histlist = glob.glob(histfile_tmp)
     
     if histlist:
@@ -36,7 +37,35 @@ def merge_hisrec_daily(userpath,stationnumber):
         if histlist:
              merged=pd.concat([histdata,recentdata])
                          
+
     return merged
+
+def merge_hisrec_hourly(userpath,stationnumber):
+    hour_folders = ["air_temperature", "cloud_type", "precipitation", "pressure", "soil_temperature", "solar", "sun", "visibility", "wind"]
+
+    for i,folder in enumerate(hour_folders):
+        histpath = os.path.join(userpath, 'pub','CDC','observations_germany','climate','hourly', folder, 'historical')
+        recpath  = os.path.join(userpath, 'pub','CDC','observations_germany','climate','hourly', folder, 'recent')
+
+
+        histfile_tmp = os.path.join(histpath, "stundenwerte*")
+        histfile_tmp += str(stationnumber).zfill(5)+'*/produkt*'
+        histfile = glob.glob(histfile_tmp)[0]
+
+        recfile_tmp = os.path.join(recpath, "stundenwerte*")
+        recfile_tmp += str(stationnumber).zfill(5)+'*/produkt*'
+        recfile = glob.glob(recfile_tmp)[0]
+
+        histdata = pd.read_table(histfile, sep=";", low_memory=False)
+        recentdata = pd.read_table(recfile, sep=";", low_memory=False)
+        if i==0:
+            merged_all=pd.concat([histdata,recentdata])
+        if i>1:
+            merged=pd.concat([histdata,recentdata])
+            if merged['MESS_DATUM'] == merged_all['MESS_DATUM']:
+                merged_all=pd.concat([merged_all,merged.drop(columns=['MESS_DATUM','STATIONS_ID','eor'])],axis=1)
+
+    return merged_all
 
 def clean_merged(merged):
     merged_clean = merged.replace(-999, np.nan, regex=True)

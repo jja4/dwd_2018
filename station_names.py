@@ -2,22 +2,25 @@ import numpy as np
 import os
 from ftplib import FTP
 import pickle
+import pandas as pd
 
 def get_station_names():
-    """ This function produces a pickled dictonary containing the station ID's
-    as keys and a list of ['town name', 'Bundesland name']
+    """ Return a dictonary containing the station ID's
+    as keys and the list [Stations_id, von_datum, bis_datum, Stationshoehe,
+    geoBreite, geoLaenge, Stationsname, Bundesland] and these column names in a list as value.
     """
 
     class Station:
-        def __init__(self, id, von, bis, height, geobr, geola, name, land):
-            self.id = id
-            self.von = von
-            self.bis = bis
-            self.height = height
-            self.geobr = geobr
-            self.geola = geola
-            self.name = name
-            self.land = land
+        def __init__(self, Stations_id, von_datum, bis_datum, Stationshoehe,
+        geoBreite, geoLaenge, Stationsname, Bundesland):
+            self.Stations_id = Stations_id
+            self.von_datum = von_datum
+            self.bis_datum = bis_datum
+            self.Stationshoehe = Stationshoehe
+            self.geoBreite = geoBreite
+            self.geoLaenge = geoLaenge
+            self.Stationsname = Stationsname
+            self.Bundesland = Bundesland
 
 
     # Download the file from the internet
@@ -34,23 +37,54 @@ def get_station_names():
     fileorigin = open("stations.txt", 'r', encoding = "cp1250")
     partial_read_in = False
     Stations = {}
-    dict = {}
+    stations_dict = {}
 
     for lineid, line in enumerate(fileorigin):
         if lineid > 1:
-            line_vec = list(filter(None,line.split(' ')))
+            line_vec = list(filter(None, line.split(' ')))
             Stations[line_vec[0]] = Station(line_vec[0],line_vec[1], line_vec[2], line_vec[3],
                                 line_vec[4], line_vec[5], line_vec[6:-1], line_vec[-1])
-            dict[Stations[line_vec[0]].id] = Stations[line_vec[0]].name
-    print("number of stations loaded: ",len(Stations))
+            stations_dict[Stations[line_vec[0]].Stations_id] = [Stations[line_vec[0]].von_datum,
+            Stations[line_vec[0]].bis_datum, Stations[line_vec[0]].Stationshoehe,
+            Stations[line_vec[0]].geoBreite, Stations[line_vec[0]].geoLaenge,
+            Stations[line_vec[0]].Stationsname, Stations[line_vec[0]].Bundesland]
+
+        elif lineid == 0:
+            column_names = list(filter(None, line.split(' ')))
+            column_names = [c.strip().lower() for c in column_names]
+
+    print("number of stations loaded: ", len(Stations))
     fileorigin.close()
 
     # Join town names that are made up of multiple strings
-    for key in dict:
-        if len(dict[key]) > 2:
-            town_name = dict[key][0:-1]
-            land_name = dict[key][-1]
+    for key in stations_dict:
+        if len(stations_dict[key][5]) > 2:
+            town_name = stations_dict[key][5][0:-1]
+            land_name = stations_dict[key][5][-1]
             joint_name = " ".join(town_name)
-            dict[key] = [joint_name, land_name]
+            stations_dict[key][5] = joint_name
+            stations_dict[key][6] = land_name
+        else:
+            stations_dict[key][6] = stations_dict[key][5][1]
+            stations_dict[key][5] = stations_dict[key][5][0]
 
-    pickle.dump(dict, open("stations.p", "wb"))
+    return stations_dict, column_names
+
+def get_stations_dataframe():
+    'Return stations in a pandas DataFrame'
+
+    stations_dict, column_names = get_station_names()
+
+    stations_pd = pd.DataFrame.from_dict(stations_dict, orient = 'index')
+    stations_pd = stations_pd.reset_index()
+    stations_pd.set_axis(column_names, axis = 'columns', inplace = True)
+    stations_pd['stations_id'] = stations_pd['stations_id'].apply(int)
+    stations_pd = stations_pd.set_index('stations_id')
+    stations_pd['von_datum'] = pd.to_datetime(stations_pd['von_datum'])
+    stations_pd['bis_datum'] = pd.to_datetime(stations_pd['bis_datum'])
+
+    return stations_pd
+
+if __name__ == '__main__':
+    stations_dict = get_station_names()
+    pickle.dump(stations_dict, open("stations.p", "wb"))
