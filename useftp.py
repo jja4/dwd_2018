@@ -23,6 +23,17 @@ def download_folder(ftp, userpath,foldername, VERBOSE = True):
         if i%int(len(filenames)/100)==0: #update status every 1%
             k+=1
 
+def delete_folder(folder, VERBOSE = True):
+    for file in os.listdir(folder):
+        file_path = os.path.join(folder, file)
+        try:
+            if os.path.isfile(file_path):
+            os.unlink(file_path)
+            if VERBOSE:
+                print("deleted contents of folder "+folder)
+        except Exception as e:
+            print(e)
+
 def download_data(userpath, historical=True, recent=True, hourly=True, VERBOSE = True):
     ftp = FTP(server)
     ftp.login()
@@ -51,6 +62,10 @@ def get_recent_data(userpath,VERBOSE=True):
     if not os.path.isdir(recentpath):
         if VERBOSE: print("directory did not exist, it will be created")
         os.makedirs(recentpath)
+    else:
+        if VERBOSE: print("deleting previous version of recent data")
+        delete_folder(recentpath, VERBOSE = True)
+
     download_folder(ftp, userpath, 'pub/CDC//observations_germany/climate/daily/kl/recent',VERBOSE=VERBOSE)
 
 def get_hourly_data(userpath,VERBOSE=True):
@@ -71,10 +86,17 @@ def get_hourly_data(userpath,VERBOSE=True):
         if not os.path.isdir(hourpath_recent):
             if VERBOSE: print("downloading recent hourly data")
             os.makedirs(hourpath_recent)
+        else:
+            if VERBOSE: print("deleting previous version of recent data")
+            delete_folder(hourpath_recent, VERBOSE = True)
+
         download_folder(ftp, userpath, hourpath+'/recent',VERBOSE=VERBOSE)
 
     solarpath = 'pub/CDC//observations_germany/climate/hourly/solar'
     if VERBOSE: print("now downloading solar hourly data into {}".format(solarpath))
     if not os.path.isdir(solarpath):
         os.makedirs(solarpath)
+    else:
+        if VERBOSE: print("deleting previous version of solar data")
+        delete_folder(solarpath, VERBOSE = True)
     download_folder(ftp, userpath, solarpath,VERBOSE=VERBOSE)
