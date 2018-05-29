@@ -92,3 +92,11 @@ class DailyPeriodPrediction(db.Entity):
     precipitation_l     = porm.Optional(float)
     wind_direction      = porm.Optional(str, 3)
     condition           = porm.Optional(str)
+    
+    
+def set_up_connection(db, db_name, user='', host=''):
+    '''
+    Sets up a connection with the database server.
+    '''
+    db.bind(provider='postgres', user='', password='', host='', database=db_name)
+    db.generate_mapping(create_tables = True)
