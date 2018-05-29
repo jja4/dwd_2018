@@ -1,9 +1,15 @@
 from ftplib import FTP
 import os, sys
-import shutil #this can make the progressbar pretty
 
-console_width = shutil.get_terminal_size()[0]
+#prettify the progressbar
+try:
+    import shutil #this module can get the terminal width
+    console_width = shutil.get_terminal_size()[0]
+except:
+    print("Using 'shutil' failed, will assume console width of 80")
+    console_width = 80 #default width
 progress_bar_width = console_width - 6
+
 server = "ftp-cdc.dwd.de"
 
 def download_folder(ftp, userpath,foldername, verbose):
@@ -18,7 +24,9 @@ def download_folder(ftp, userpath,foldername, verbose):
             # the ljust method pads the string with whitespaces, this is needed to remove
             # the previous statusbar
             to_print = "downloaded {}".format(filename)
-            # sys.stdout.write(to_print.ljust(console_width-len(to_print)))
+            fill_diff = console_width-len(to_print)
+            if fill_diff>0:
+                to_print+=' '*fill_diff
             sys.stdout.write(to_print)
             sys.stdout.write('\n')
             sys.stdout.flush()
@@ -26,7 +34,7 @@ def download_folder(ftp, userpath,foldername, verbose):
         pperc = int(progress_bar_width*i/len(filenames)) #percentage of progressbar thats done
         sys.stdout.write("[{}{}] {}%\r".format('='*pperc,' '*(progress_bar_width-pperc), str(perc).zfill(2)))
         sys.stdout.flush()
-    sys.stdout.write("[{}] {}%\n".format('='*100, 100)) #write bar with 100%
+    sys.stdout.write("[{}] {}%\n".format('='*progress_bar_width-1, 100)) #write bar with 100%
     sys.stdout.flush()
 
 def delete_folder(folder, verbose = True):
@@ -101,8 +109,11 @@ def get_hourly_data(userpath,ftp,verbose=True):
     solarpath = 'pub/CDC/observations_germany/climate/hourly/solar'
     sp = os.path.join(userpath, solarpath)
     if verbose: print("now downloading solar hourly data into {}".format(solarpath))
+
     if not os.path.isdir(sp):
+        if verbose: print("solarpath did not exist so it will be created")   
         os.makedirs(sp)
+
     else:
         if verbose: print("deleting previous version of solar data")
         delete_folder(sp, verbose = True)
