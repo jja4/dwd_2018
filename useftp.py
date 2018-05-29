@@ -75,7 +75,7 @@ def get_recent_data(userpath,ftp,verbose):
     download_folder(ftp, userpath, 'pub/CDC//observations_germany/climate/daily/kl/recent',verbose=verbose)
 
 def get_hourly_data(userpath,ftp,verbose=True):
-    hour_folders = []#"air_temperature", "cloud_type", "precipitation", "pressure", "soil_temperature", "sun", "visibility", "wind"]
+    hour_folders = ["air_temperature", "cloud_type", "precipitation", "pressure", "soil_temperature", "sun", "visibility", "wind"]
     if verbose: print("will now download hourly predictions")
     for folder in hour_folders:
         if verbose: print("now downloading {}".format(folder))
