@@ -116,3 +116,19 @@ def insert_into_table(df, table_name, pk=None):
             table_obj(**df_dict[i])
     
     porm.commit()
+    
+    
+@porm.db_session
+def insert_into_table2(df, table_name, pk=None):
+    df_dict = df.to_dict('index')
+    table_obj = db.entities['Station']
+    
+    if pk is None:
+        pk = str(df.index.name)
+        
+    for i in df_dict.keys():
+        try:
+            df_dict[i][pk] = i
+            table_obj(**df_dict[i])
+        except CacheIndexError:
+            pass
