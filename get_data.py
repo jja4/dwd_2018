@@ -6,7 +6,7 @@ from useftp import download_data
 from unzip_all import unzip_folder
 import getopt
 
-def get_data(userpath, historical = True, recent = True, hourly = True, verbose = True):
+def get_data(userpath, historical, recent, hourly, verbose):
     #download the files
     print("getting data")
     download_data(userpath = userpath,
@@ -31,6 +31,11 @@ def get_data(userpath, historical = True, recent = True, hourly = True, verbose 
 
 
 def main():
+    """
+    This method is called if this file is executed.
+    It takes commandline arguments and options that specify which data should
+    be downloaded.
+    """
     try:
         options, args = getopt.getopt(sys.argv[1:], "vgrsh", ["verbose", "historical", "recent", "hourly","help"])
     except getopt.GetoptError as err:
@@ -44,13 +49,21 @@ def main():
     hourly = False
     help = False
     for opt, arg in options:
-        if opt in ("-v", "--verbose"): verbose = True
+        if opt in ("-v", "--verbose"):
+            verbose = True
+            print('verbose is {}'.format(verbose))
         elif opt in ("-h", "--help"):
             help = True
             usage()
-        elif opt in ("-g","--historical"): historical = True
-        elif opt in ("-r", "--recent"): recent = True
-        elif opt in ("-s","--hourly"): hourly = True
+        elif opt in ("-g","--historical"):
+            historical = True
+            print('historical is {}'.format(historical))
+        elif opt in ("-r", "--recent"):
+            recent = True
+            print('recent is {}'.format(recent))
+        elif opt in ("-s","--hourly"):
+            hourly = True
+            print('hourly is {}'.format(hourly))
         else: assert False, "unhandled option"
 
     try: path = args[0]
@@ -67,6 +80,10 @@ def main():
              verbose = verbose)
 
 def usage():
+    """
+    Help function for the command line. Displays all the options/arguments and
+    their use.
+    """
     print("""Usage: 'python get_data -vgrsh path'\n
     arguments:\n
     \t path : the path where you want to save the data \n

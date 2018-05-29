@@ -1,11 +1,13 @@
 from ftplib import FTP
 import os, sys
+import shutil #this can make the progressbar pretty
 
+console_width = shutil.get_terminal_size()[0]
+progress_bar_width = console_width - 6
 server = "ftp-cdc.dwd.de"
 
-def download_folder(ftp, userpath,foldername, verbose = True):
+def download_folder(ftp, userpath,foldername, verbose):
     filenames = ftp.nlst(foldername)
-    k = 0 #percentage downloade counter
     for i, filename in enumerate(filenames):
         local_filename = os.path.join(userpath, filename)
         file = open(local_filename, 'wb')
@@ -15,13 +17,17 @@ def download_folder(ftp, userpath,foldername, verbose = True):
             # what this actually does is to overwrite the last printout that was the statusbar
             # the ljust method pads the string with whitespaces, this is needed to remove
             # the previous statusbar
-            sys.stdout.write("downloaded {}".format(filename).ljust(200))
+            to_print = "downloaded {}".format(filename)
+            # sys.stdout.write(to_print.ljust(console_width-len(to_print)))
+            sys.stdout.write(to_print)
             sys.stdout.write('\n')
             sys.stdout.flush()
-        sys.stdout.write("[{}{}] {}%\r".format('='*k,' '*(101-k), k))
+        perc = int(100*i/len(filenames))
+        pperc = int(progress_bar_width*i/len(filenames)) #percentage of progressbar thats done
+        sys.stdout.write("[{}{}] {}%\r".format('='*pperc,' '*(progress_bar_width-pperc), str(perc).zfill(2)))
         sys.stdout.flush()
-        if i%int(len(filenames)/100)==0: #update status every 1%
-            k+=1
+    sys.stdout.write("[{}] {}%\n".format('='*100, 100)) #write bar with 100%
+    sys.stdout.flush()
 
 def delete_folder(folder, verbose = True):
     for file in os.listdir(folder):
@@ -34,21 +40,21 @@ def delete_folder(folder, verbose = True):
     if verbose:
         print("deleted contents of folder "+folder)
 
-def download_data(userpath, historical=True, recent=True, hourly=True, verbose = True):
+def download_data(userpath, historical, recent, hourly, verbose):
     ftp = FTP(server)
     ftp.login()
     if verbose: print("logged in to server {}".format(server))
     if historical:
         if verbose: print("gonna get historical data")
-        get_historical_data(userpath,ftp)
+        get_historical_data(userpath,ftp,verbose)
     if recent:
         if verbose: print("gonna get recent data")
-        get_recent_data(userpath,ftp)
+        get_recent_data(userpath,ftp,verbose)
     if hourly:
         if verbose: print("gonna get hourly data")
-        get_hourly_data(userpath,ftp)
+        get_hourly_data(userpath,ftp,verbose)
 
-def get_historical_data(userpath,ftp,verbose=True):
+def get_historical_data(userpath,ftp,verbose):
     histpath = os.path.join(userpath,'pub/CDC/observations_germany/climate/daily/kl/historical/')
     if verbose: print('directory for historical data: {}'.format(histpath))
     if not os.path.isdir(histpath):
@@ -56,7 +62,7 @@ def get_historical_data(userpath,ftp,verbose=True):
         os.makedirs(histpath)
         download_folder(ftp, userpath,'pub/CDC//observations_germany/climate/daily/kl/historical', verbose=verbose)
 
-def get_recent_data(userpath,ftp,verbose=True):
+def get_recent_data(userpath,ftp,verbose):
     recentpath = os.path.join(userpath,'pub/CDC/observations_germany/climate/daily/kl/recent/')
     if verbose: print("directory for recent data: {}".format(recentpath))
     if not os.path.isdir(recentpath):
