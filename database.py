@@ -130,5 +130,16 @@ def insert_into_table2(df, table_name, pk=None):
         try:
             df_dict[i][pk] = i
             table_obj(**df_dict[i])
-        except CacheIndexError:
+        except CacheIndexError or pony.orm.core.TransactionIntegrityError:
             pass
+        
+        
+        
+if __name__ == '__main__':
+    set_up_connection(db, 'weather2')
+
+    try:
+        stations_df = station_names.get_stations_dataframe()
+        insert_into_table(stations_df, 'station')
+    except:
+        print('Could not get or insert stations')
