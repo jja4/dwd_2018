@@ -100,3 +100,19 @@ def set_up_connection(db, db_name, user='', host=''):
     '''
     db.bind(provider='postgres', user='', password='', host='', database=db_name)
     db.generate_mapping(create_tables = True)
+    
+    
+@porm.db_session
+def insert_into_table(df, table_name, pk=None):
+    df_dict = df.to_dict('index')
+    table_obj = db.entities['Station']
+    
+    if pk is None:
+        pk = str(df.index.name)
+        
+    for i in df_dict.keys():
+        if not table_obj.exists(lambda o: getattr(o, pk) == i):
+            df_dict[i][pk] = i
+            table_obj(**df_dict[i])
+    
+    porm.commit()
