@@ -27,10 +27,10 @@ class Station(db.Entity):
 class DailyMeasurement(db.Entity):
     mess_datum  = porm.Required(date)
     stations_id = porm.Required(Station)
-    qn_3        = porm.Optional(int)  # quality level of next columns
+    qn_3        = porm.Optional(float)  # quality level of next columns
     fx          = porm.Optional(float)
     fm          = porm.Optional(float)
-    qn_4        = porm.Optional(int)
+    qn_4        = porm.Optional(float)
     rsk         = porm.Optional(float)
     rskf        = porm.Optional(float)
     sdk         = porm.Optional(float)
@@ -105,14 +105,14 @@ def set_up_connection(db, db_name, user='', host=''):
 
 
 @porm.db_session
-def _insert_without_pandas(df, table_name, pk=None):
+def _insert_without_pandas(df, table_name):
     table_obj = db.entities[table_name]
+    pk = table_obj._pk_columns_
 
-    df_q = df.copy()
-    if not pk is None:
-        df_q = df_q.set_index(pk)
+    if df.index.name is None:
+        df_q = df.set_index(pk)
     else:
-        pk = df_q.index.name
+        df_q = df.copy()
 
     for i in df_q.index:
         try:
@@ -127,15 +127,14 @@ def _insert_without_pandas(df, table_name, pk=None):
 
 
 @porm.db_session
-def _insert_with_pandas(df, table_name, pk=None):
+def _insert_with_pandas(df, table_name):
     indices_to_keep = []
     table_obj = db.entities[table_name]
 
-    df_q = df.copy()
-    if not pk is None:
-        df_q = df_q.set_index(pk)
+    if df.index.name is None:
+        df_q = df.set_index(table_obj._pk_columns_)
     else:
-        pk = df_q.index.name
+        df_q = df.copy()
 
     for i in df_q.index:
         try:
@@ -150,8 +149,8 @@ def _insert_with_pandas(df, table_name, pk=None):
 
 
 @porm.db_session
-def insert_into_table(df, table_name, pk=None, use_pandas=True):
+def insert_into_table(df, table_name, use_pandas=True):
     if use_pandas:
-        _insert_with_pandas(df, table_name, pk)
+        _insert_with_pandas(df, table_name)
     else:
-        _insert_without_pandas(df, table_name, pk)
+        _insert_without_pandas(df, table_name)
