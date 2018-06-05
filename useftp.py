@@ -109,17 +109,11 @@ def get_hourly_data(userpath,ftp,verbose=True):
     solarpath = 'pub/CDC/observations_germany/climate/hourly/solar'
     sp = os.path.join(userpath, solarpath)
     if verbose: print("now downloading solar hourly data into {}".format(solarpath))
-<<<<<<< HEAD
+
     if not os.path.isdir(sp):
         if verbose: print("solarpath did not exist so it will be created")
         os.makedirs(sp)
-=======
 
-    if not os.path.isdir(sp):
-        if verbose: print("solarpath did not exist so it will be created")   
-        os.makedirs(sp)
-
->>>>>>> f66c3648f41b3ad13a06ef630039eec24afaef38
     else:
         if verbose: print("deleting previous version of solar data")
         delete_folder(sp, verbose = True)
