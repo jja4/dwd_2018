@@ -100,7 +100,7 @@ def set_up_connection(db, db_name, user='', host=''):
     '''
     Sets up a connection with the database server.
     '''
-    db.bind(provider='postgres', user='', password='', host='', database=db_name)
+    db.bind(provider='postgres', user=user, password=password, host=host, database=db_name)
     db.generate_mapping(create_tables = True)
 
 
