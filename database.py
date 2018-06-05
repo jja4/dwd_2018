@@ -105,7 +105,7 @@ def set_up_connection(db, db_name, user='', host=''):
 @porm.db_session
 def insert_into_table(df, table_name, pk=None):
     df_dict = df.to_dict('index')
-    table_obj = db.entities['Station']
+    table_obj = db.entities[table_name]
     
     if pk is None:
         pk = str(df.index.name)
@@ -121,7 +121,7 @@ def insert_into_table(df, table_name, pk=None):
 @porm.db_session
 def insert_into_table2(df, table_name, pk=None):
     df_dict = df.to_dict('index')
-    table_obj = db.entities['Station']
+    table_obj = db.entities[table_name]
     
     if pk is None:
         pk = str(df.index.name)
