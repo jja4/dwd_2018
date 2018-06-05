@@ -7,7 +7,7 @@ try:
     console_width = shutil.get_terminal_size()[0]
 except:
     print("Using 'shutil' failed, will assume console width of 80")
-    console_width = 80 #default width
+    console_width = 80 #default terminal width
 progress_bar_width = console_width - 6
 
 server = "ftp-cdc.dwd.de"
