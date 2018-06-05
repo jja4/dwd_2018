@@ -32,7 +32,7 @@ def download_folder(ftp, userpath,foldername, verbose):
             sys.stdout.flush()
         perc = int(100*i/len(filenames))
         pperc = int(progress_bar_width*i/len(filenames)) #percentage of progressbar thats done
-        sys.stdout.write("[{}{}] {}%\r".format('='*pperc,' '*(progress_bar_width-pperc), str(perc).zfill(2)))
+        sys.stdout.write("[{}] {}%\r".format(('='*pperc).ljust(progress_bar_width), str(perc).zfill(2)))
         sys.stdout.flush()
     sys.stdout.write("[{}] {}%\n".format('='*progress_bar_width-1, 100)) #write bar with 100%
     sys.stdout.flush()
@@ -111,7 +111,7 @@ def get_hourly_data(userpath,ftp,verbose=True):
     if verbose: print("now downloading solar hourly data into {}".format(solarpath))
 
     if not os.path.isdir(sp):
-        if verbose: print("solarpath did not exist so it will be created")   
+        if verbose: print("solarpath did not exist so it will be created")
         os.makedirs(sp)
 
     else:
