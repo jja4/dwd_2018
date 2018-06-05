@@ -105,7 +105,7 @@ def set_up_connection(db, db_name, user='', host=''):
 
 
 @porm.db_session
-def insert(df, table_name, pk=None):
+def _insert_without_pandas(df, table_name, pk=None):
     table_obj = db.entities[table_name]
 
     df_q = df.copy()
@@ -125,9 +125,9 @@ def insert(df, table_name, pk=None):
                 table_obj(**{**{pk : i},
                              **df_q.loc[i].to_dict()})
 
-                             
+
 @porm.db_session
-def insert_with_pandas(df, table_name, pk=None):
+def _insert_with_pandas(df, table_name, pk=None):
     indices_to_keep = []
     table_obj = db.entities[table_name]
 
@@ -147,3 +147,11 @@ def insert_with_pandas(df, table_name, pk=None):
 
     df_to_insert = df_q.loc[indices_to_keep]
     df_to_insert.to_sql(table_name.lower(), conn_url, if_exists='append', index=True)
+
+
+@porm.db_session
+def insert_into_table(df, table_name, pk=None, use_pandas=True):
+    if use_pandas:
+        _insert_with_pandas(df, table_name, pk)
+    else:
+        _insert_without_pandas(df, table_name, pk)
