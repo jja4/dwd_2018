@@ -48,14 +48,28 @@ def merge_hisrec_hourly(userpath,stationnumber):
 
         histfile_tmp = os.path.join(histpath, "stundenwerte*")
         histfile_tmp += str(stationnumber).zfill(5)+'*/produkt*'
-        histfile = glob.glob(histfile_tmp)[0]
+        #histfile = glob.glob(histfile_tmp)[0]
+        histlist = glob.glob(histfile_tmp)
+        if histlist:
+            histfile = glob.glob(histfile_tmp)[0]
+            histdata = pd.read_table(histfile, sep=";", low_memory=False)
+        else
+            histdata = []    
+
 
         recfile_tmp = os.path.join(recpath, "stundenwerte*")
         recfile_tmp += str(stationnumber).zfill(5)+'*/produkt*'
-        recfile = glob.glob(recfile_tmp)[0]
-
-        histdata = pd.read_table(histfile, sep=";", low_memory=False)
-        recentdata = pd.read_table(recfile, sep=";", low_memory=False)
+        #recfile = glob.glob(recfile_tmp)[0]
+        
+        reclist = glob.glob(recfile_tmp)
+        if reclist:
+            recfile = glob.glob(recfile_tmp)[0]
+            recentdata = pd.read_table(recfile, sep=";", low_memory=False)
+        else
+            recentdata = []
+          
+        #histdata = pd.read_table(histfile, sep=";", low_memory=False)
+        #recentdata = pd.read_table(recfile, sep=";", low_memory=False)
         if i==0:
             merged_all=pd.concat([histdata,recentdata])
         if i>1:
@@ -73,3 +87,4 @@ def clean_merged(merged):
     merged_clean = merged_clean.drop_duplicates()
 
     return merged_clean
+
