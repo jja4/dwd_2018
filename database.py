@@ -120,21 +120,54 @@ def insert_into_table(df, table_name, pk=None):
     
 @porm.db_session
 def insert_into_table2(df, table_name, pk=None):
+    import pony.orm.core.TransactionIntegrityError as TransactionIntegrityError
+    
     df_dict = df.to_dict('index')
     table_obj = db.entities[table_name]
     
     if pk is None:
         pk = str(df.index.name)
-        
+
     for i in df_dict.keys():
         try:
             df_dict[i][pk] = i
             table_obj(**df_dict[i])
-        except CacheIndexError or pony.orm.core.TransactionIntegrityError:
+        except (CacheIndexError, TransactionIntegrityError):
             pass
+
+@porm.db_session
+def insert_into_table2_2(df, table_name, pk=None):
+    import pony.orm.core.TransactionIntegrityError as TransactionIntegrityError
+    
+    df_dict = df.to_dict('index')
+    table_obj = db.entities[table_name]
+    
+    if pk is None:
+        pk = tuple(df.index.name)
+
+    for i in df_dict.keys():
+        try:
+            df_dict[i][pk] = i
+            table_obj(**df_dict[i])
+        except (CacheIndexError, TransactionIntegrityError):
+            print(i)
         
-        
-        
+
+@porm.db_session
+def insert_into_table3(df, table_name, pk=None, verbose=False):
+    from sqlalchemy.exc import IntegrityError
+
+    if not df.index.name is None:
+        df = df.reset_index()
+    
+    for idx, row in df.iterrows():
+        try:
+            row.to_frame().T.to_sql(table_name, conn_url, if_exists='append', index=False)
+        except IntegrityError as e:
+            if verbose:
+                print(row.stations_id)
+
+
 if __name__ == '__main__':
     set_up_connection(db, 'weather2')
 
