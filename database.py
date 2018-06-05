@@ -96,7 +96,7 @@ class DailyPeriodPrediction(db.Entity):
     condition           = porm.Optional(str)
 
 
-def set_up_connection(db, db_name, user='', host=''):
+def set_up_connection(db, db_name, user='', password='', host=''):
     '''
     Sets up a connection with the database server.
     '''
