@@ -5,7 +5,7 @@ import station_names
 
 from pony.orm.core import ObjectNotFound, TransactionIntegrityError
 
-conn_url = 'postgresql://@localhost:5432/weather2'
+conn_url = 'postgresql://localhost:5432'
 db = porm.Database()
 
 class Station(db.Entity):
@@ -96,12 +96,13 @@ class DailyPeriodPrediction(db.Entity):
     condition           = porm.Optional(str)
 
 
-def set_up_connection(db, db_name, user='', password='', host=''):
+def set_up_connection(db, db_name, user='', password='', host='127.0.0.1'):
     '''
     Sets up a connection with the database server.
     '''
     db.bind(provider='postgres', user=user, password=password, host=host, database=db_name)
     db.generate_mapping(create_tables = True)
+    conn_url = 'postgresql://{}:{}@{}:5432/{}'.format(user, password, host, db_name)
 
 
 @porm.db_session
@@ -135,6 +136,12 @@ def _insert_with_pandas(df, table_name):
         df_q = df.set_index(table_obj._pk_columns_)
     else:
         df_q = df.copy()
+
+    try:
+        df_q.to_sql(table_name.lower(), conn_url, if_exists='append', index=True)
+        return True
+    except:
+        pass
 
     for i in df_q.index:
         try:
