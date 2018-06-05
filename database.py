@@ -27,10 +27,10 @@ class Station(db.Entity):
 class DailyMeasurement(db.Entity):
     mess_datum  = porm.Required(date)
     stations_id = porm.Required(Station)
-    qn_3        = porm.Optional(float)  # quality level of next columns
+    qn_3        = porm.Optional(int)  # quality level of next columns
     fx          = porm.Optional(float)
     fm          = porm.Optional(float)
-    qn_4        = porm.Optional(float)
+    qn_4        = porm.Optional(int)
     rsk         = porm.Optional(float)
     rskf        = porm.Optional(float)
     sdk         = porm.Optional(float)
