@@ -2,6 +2,7 @@ import pony.orm as porm
 import database
 from datetime import date
 import station_names
+import getpass
 
 from pony.orm.core import ObjectNotFound, TransactionIntegrityError
 
@@ -96,10 +97,12 @@ class DailyPeriodPrediction(db.Entity):
     condition           = porm.Optional(str)
 
 
-def set_up_connection(db, db_name, user='', password='', host='127.0.0.1'):
+def set_up_connection(db, db_name, user='', password=None, host='127.0.0.1'):
     '''
     Sets up a connection with the database server.
     '''
+    if password is None:
+        password = getpass.getpass(prompt='postgres user password: ')
     db.bind(provider='postgres', user=user, password=password, host=host, database=db_name)
     db.generate_mapping(create_tables = True)
     conn_url = 'postgresql://{}:{}@{}:5432/{}'.format(user, password, host, db_name)
