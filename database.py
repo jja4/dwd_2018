@@ -3,6 +3,8 @@ import database
 from datetime import date
 import station_names
 
+from pony.orm.core import ObjectNotFound, TransactionIntegrityError
+
 conn_url = 'postgresql://@localhost:5432/weather2'
 db = porm.Database()
 
@@ -16,12 +18,12 @@ class Station(db.Entity):
     stationsname  = porm.Required(str)
     bundesland    = porm.Optional(str)
     measurements  = porm.Set('DailyMeasurement')
-    
+
     @classmethod
     def in_Berlin(cls):
         return cls.select(lambda s: 'Berlin' in s.stationsname)
 
-    
+
 class DailyMeasurement(db.Entity):
     mess_datum  = porm.Required(date)
     stations_id = porm.Required(Station)
@@ -41,10 +43,10 @@ class DailyMeasurement(db.Entity):
     txk         = porm.Optional(float)
     tnk         = porm.Optional(float)
     tgk         = porm.Optional(float)
-    
+
     porm.PrimaryKey(mess_datum, stations_id)
-    
-    
+
+
 class DailyPrediction(db.Entity):
     id                 = porm.PrimaryKey(int, auto=True)
     website            = porm.Required(str)
@@ -61,8 +63,8 @@ class DailyPrediction(db.Entity):
     condition          = porm.Optional(str, nullable=True)
     snow               = porm.Optional(float, nullable=True)
     UVI                = porm.Optional(int, unsigned=True)
-    
-    
+
+
 class HourlyPrediction(db.Entity):
     id                  = porm.PrimaryKey(int, auto=True)
     website             = porm.Required(str)
@@ -78,8 +80,8 @@ class HourlyPrediction(db.Entity):
     condition           = porm.Optional(str)
     snow                = porm.Optional(float)
     UVI                 = porm.Optional(int, unsigned=True)
-    
-    
+
+
 class DailyPeriodPrediction(db.Entity):
     id                  = porm.PrimaryKey(int, auto=True)
     website             = porm.Required(str)
@@ -92,11 +94,56 @@ class DailyPeriodPrediction(db.Entity):
     precipitation_l     = porm.Optional(float)
     wind_direction      = porm.Optional(str, 3)
     condition           = porm.Optional(str)
-    
-    
+
+
 def set_up_connection(db, db_name, user='', host=''):
     '''
     Sets up a connection with the database server.
     '''
     db.bind(provider='postgres', user='', password='', host='', database=db_name)
     db.generate_mapping(create_tables = True)
+
+
+@porm.db_session
+def insert(df, table_name, pk=None):
+    table_obj = db.entities[table_name]
+
+    df_q = df.copy()
+    if not pk is None:
+        df_q = df_q.set_index(pk)
+    else:
+        pk = df_q.index.name
+
+    for i in df_q.index:
+        try:
+            table_obj[i]
+        except ObjectNotFound:
+            try:
+                table_obj(**{**dict(zip(pk, i)),
+                             **df_q.loc[i].to_dict()})
+            except TypeError:
+                table_obj(**{**{pk : i},
+                             **df_q.loc[i].to_dict()})
+
+                             
+@porm.db_session
+def insert_with_pandas(df, table_name, pk=None):
+    indices_to_keep = []
+    table_obj = db.entities[table_name]
+
+    df_q = df.copy()
+    if not pk is None:
+        df_q = df_q.set_index(pk)
+    else:
+        pk = df_q.index.name
+
+    for i in df_q.index:
+        try:
+            table_obj[i]
+        except ObjectNotFound:
+            indices_to_keep.append(i)
+        except:
+            print(i)
+
+    df_to_insert = df_q.loc[indices_to_keep]
+    df_to_insert.to_sql(table_name.lower(), conn_url, if_exists='append', index=True)
