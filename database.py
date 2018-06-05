@@ -16,12 +16,12 @@ class Station(db.Entity):
     stationsname  = porm.Required(str)
     bundesland    = porm.Optional(str)
     measurements  = porm.Set('DailyMeasurement')
-    
+
     @classmethod
     def in_Berlin(cls):
         return cls.select(lambda s: 'Berlin' in s.stationsname)
 
-    
+
 class DailyMeasurement(db.Entity):
     mess_datum  = porm.Required(date)
     stations_id = porm.Required(Station)
@@ -41,10 +41,10 @@ class DailyMeasurement(db.Entity):
     txk         = porm.Optional(float)
     tnk         = porm.Optional(float)
     tgk         = porm.Optional(float)
-    
+
     porm.PrimaryKey(mess_datum, stations_id)
-    
-    
+
+
 class DailyPrediction(db.Entity):
     id                 = porm.PrimaryKey(int, auto=True)
     website            = porm.Required(str)
@@ -61,8 +61,8 @@ class DailyPrediction(db.Entity):
     condition          = porm.Optional(str, nullable=True)
     snow               = porm.Optional(float, nullable=True)
     UVI                = porm.Optional(int, unsigned=True)
-    
-    
+
+
 class HourlyPrediction(db.Entity):
     id                  = porm.PrimaryKey(int, auto=True)
     website             = porm.Required(str)
@@ -78,8 +78,8 @@ class HourlyPrediction(db.Entity):
     condition           = porm.Optional(str)
     snow                = porm.Optional(float)
     UVI                 = porm.Optional(int, unsigned=True)
-    
-    
+
+
 class DailyPeriodPrediction(db.Entity):
     id                  = porm.PrimaryKey(int, auto=True)
     website             = porm.Required(str)
@@ -92,39 +92,39 @@ class DailyPeriodPrediction(db.Entity):
     precipitation_l     = porm.Optional(float)
     wind_direction      = porm.Optional(str, 3)
     condition           = porm.Optional(str)
-    
-    
+
+
 def set_up_connection(db, db_name, user='', host=''):
     '''
     Sets up a connection with the database server.
     '''
     db.bind(provider='postgres', user='', password='', host='', database=db_name)
     db.generate_mapping(create_tables = True)
-    
-    
+
+
 @porm.db_session
 def insert_into_table(df, table_name, pk=None):
     df_dict = df.to_dict('index')
     table_obj = db.entities[table_name]
-    
+
     if pk is None:
         pk = str(df.index.name)
-        
+
     for i in df_dict.keys():
         if not table_obj.exists(lambda o: getattr(o, pk) == i):
             df_dict[i][pk] = i
             table_obj(**df_dict[i])
-    
+
     porm.commit()
-    
-    
+
+
 @porm.db_session
 def insert_into_table2(df, table_name, pk=None):
     import pony.orm.core.TransactionIntegrityError as TransactionIntegrityError
-    
+
     df_dict = df.to_dict('index')
     table_obj = db.entities[table_name]
-    
+
     if pk is None:
         pk = str(df.index.name)
 
@@ -138,10 +138,10 @@ def insert_into_table2(df, table_name, pk=None):
 @porm.db_session
 def insert_into_table2_2(df, table_name, pk=None):
     import pony.orm.core.TransactionIntegrityError as TransactionIntegrityError
-    
+
     df_dict = df.to_dict('index')
     table_obj = db.entities[table_name]
-    
+
     if pk is None:
         pk = tuple(df.index.name)
 
@@ -151,7 +151,7 @@ def insert_into_table2_2(df, table_name, pk=None):
             table_obj(**df_dict[i])
         except (CacheIndexError, TransactionIntegrityError):
             print(i)
-        
+
 
 @porm.db_session
 def insert_into_table3(df, table_name, pk=None, verbose=False):
@@ -159,7 +159,7 @@ def insert_into_table3(df, table_name, pk=None, verbose=False):
 
     if not df.index.name is None:
         df = df.reset_index()
-    
+
     for idx, row in df.iterrows():
         try:
             row.to_frame().T.to_sql(table_name, conn_url, if_exists='append', index=False)
