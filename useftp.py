@@ -34,7 +34,7 @@ def download_folder(ftp, userpath,foldername, verbose):
         pperc = int(progress_bar_width*i/len(filenames)) #percentage of progressbar thats done
         sys.stdout.write("[{}] {}%\r".format(('='*pperc).ljust(progress_bar_width), str(perc).zfill(2)))
         sys.stdout.flush()
-    sys.stdout.write("[{}] {}%\n".format('='*progress_bar_width-1, 100)) #write bar with 100%
+    sys.stdout.write("[{}] {}%\n".format('='*(progress_bar_width-1), 100)) #write bar with 100%
     sys.stdout.flush()
 
 def delete_folder(folder, verbose = True):
