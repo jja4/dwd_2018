@@ -112,17 +112,8 @@ class DailyPeriodPrediction(db.Entity):
     condition           = porm.Optional(str)
 
 
-def set_up_connection(db, db_name, user='', password=None, host='127.0.0.1'):
-    '''
-    Sets up a connection with the database server.
-    '''
-    if password is None:
-        password = getpass.getpass(prompt='postgres user password: ')
-    db.bind(provider='postgres', user=user, password=password, host=host, database=db_name)
-    db.generate_mapping(create_tables = True)
-    global conn_url
-    conn_url = 'postgresql://{}:{}@{}:5432/{}'.format(user, password, host, db_name)
-
+@porm.db_session
+def set_station_trigger(db):
     trigger_text = '''
     create or replace function set_station()
     returns trigger as '
@@ -141,6 +132,19 @@ def set_up_connection(db, db_name, user='', password=None, host='127.0.0.1'):
     '''
 
     db.execute(trigger_text)
+
+
+def set_up_connection(db, db_name, user='', password=None, host='127.0.0.1'):
+    '''
+    Sets up a connection with the database server.
+    '''
+    if password is None:
+        password = getpass.getpass(prompt='postgres user password: ')
+    db.bind(provider='postgres', user=user, password=password, host=host, database=db_name)
+    db.generate_mapping(create_tables = True)
+    global conn_url
+    conn_url = 'postgresql://{}:{}@{}:5432/{}'.format(user, password, host, db_name)
+    set_station_trigger(db)
 
 
 @porm.db_session
