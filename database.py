@@ -6,6 +6,7 @@ import getpass
 
 from pony.orm.core import ObjectNotFound, TransactionIntegrityError
 
+
 conn_url = 'postgresql://localhost:5432'
 db = porm.Database()
 
@@ -27,7 +28,8 @@ class Station(db.Entity):
 
 class DailyMeasurement(db.Entity):
     mess_datum  = porm.Required(date)
-    stations_id = porm.Required(Station)
+    stations_id = porm.Required(int)
+    station     = porm.Optional(Station)
     qn_3        = porm.Optional(int)  # quality level of next columns
     fx          = porm.Optional(float)
     fm          = porm.Optional(float)
@@ -47,6 +49,19 @@ class DailyMeasurement(db.Entity):
 
     porm.PrimaryKey(mess_datum, stations_id)
 
+    #import math
+    #def before_insert(self):
+    #    for x in self._columns_:
+    #        if isinstance(getattr(self, x), float):
+    #            if math.isnan((getattr(self, x))):
+    #                setattr(self, x, None)
+    #    self.station = Station[self.stations_id]
+
+    #def after_insert(self):
+    #    self.station = Station[self.stations_id]
+
+    #def after_update(self):
+    #    self.station = Station[self.stations_id]
 
 class DailyPrediction(db.Entity):
     id                 = porm.PrimaryKey(int, auto=True)
@@ -105,7 +120,27 @@ def set_up_connection(db, db_name, user='', password=None, host='127.0.0.1'):
         password = getpass.getpass(prompt='postgres user password: ')
     db.bind(provider='postgres', user=user, password=password, host=host, database=db_name)
     db.generate_mapping(create_tables = True)
+    global conn_url
     conn_url = 'postgresql://{}:{}@{}:5432/{}'.format(user, password, host, db_name)
+
+    trigger_text = '''
+    create or replace function set_station()
+    returns trigger as '
+    begin
+        new.station := new.stations_id;
+        return new;
+    end;
+    ' language plpgsql;
+
+    drop trigger if exists set_station on dailymeasurement;
+    create trigger set_station
+    before insert
+    on dailymeasurement
+    for each row
+    execute procedure set_station();
+    '''
+
+    db.execute(trigger_text)
 
 
 @porm.db_session
@@ -142,20 +177,17 @@ def _insert_with_pandas(df, table_name):
 
     try:
         df_q.to_sql(table_name.lower(), conn_url, if_exists='append', index=True)
-        return True
     except:
-        pass
+        for i in df_q.index:
+            try:
+                table_obj[i]
+            except ObjectNotFound:
+                indices_to_keep.append(i)
+            except:
+                print(i)
 
-    for i in df_q.index:
-        try:
-            table_obj[i]
-        except ObjectNotFound:
-            indices_to_keep.append(i)
-        except:
-            print(i)
-
-    df_to_insert = df_q.loc[indices_to_keep]
-    df_to_insert.to_sql(table_name.lower(), conn_url, if_exists='append', index=True)
+        df_to_insert = df_q.loc[indices_to_keep]
+        df_to_insert.to_sql(table_name.lower(), conn_url, if_exists='append', index=True)
 
 
 @porm.db_session
