@@ -18,24 +18,23 @@ def merge_hisrec_daily(userpath,stationnumber):
 
     histfile_tmp = os.path.join(histpath, "produkt_klima_tag_*") #list of filenames
     histfile_tmp += str(stationnumber).zfill(5)+'.txt'
-
     histlist = glob.glob(histfile_tmp)
-
     if histlist:
         histfile = glob.glob(histfile_tmp)[0]
         histdata = pd.read_table(histfile, sep=";", low_memory=False)
-        merged = histdata
+    else:
+        histdata = []
 
     recfile_tmp = os.path.join(recpath, "produkt_klima_tag_*")
     recfile_tmp += str(stationnumber).zfill(5)+'.txt'
     reclist = glob.glob(recfile_tmp)
-
     if reclist:
         recfile = glob.glob(recfile_tmp)[0]
         recentdata = pd.read_table(recfile, sep=";", low_memory=False)
-        merged = recentdata
-        if histlist:
-             merged=pd.concat([histdata,recentdata])
+    else:
+        recentdata = []
+
+    merged=pd.concat([histdata,recentdata])
 
     return merged
 
@@ -48,7 +47,6 @@ def merge_hisrec_hourly(userpath,stationnumber):
 
         histfile_tmp = os.path.join(histpath, "stundenwerte*")
         histfile_tmp += str(stationnumber).zfill(5)+'*/produkt*'
-        #histfile = glob.glob(histfile_tmp)[0]
         histlist = glob.glob(histfile_tmp)
         if histlist:
             histfile = glob.glob(histfile_tmp)[0]
@@ -59,8 +57,6 @@ def merge_hisrec_hourly(userpath,stationnumber):
 
         recfile_tmp = os.path.join(recpath, "stundenwerte*")
         recfile_tmp += str(stationnumber).zfill(5)+'*/produkt*'
-        #recfile = glob.glob(recfile_tmp)[0]
-
         reclist = glob.glob(recfile_tmp)
         if reclist:
             recfile = glob.glob(recfile_tmp)[0]
@@ -68,8 +64,6 @@ def merge_hisrec_hourly(userpath,stationnumber):
         else:
             recentdata = []
 
-        #histdata = pd.read_table(histfile, sep=";", low_memory=False)
-        #recentdata = pd.read_table(recfile, sep=";", low_memory=False)
         if i==0:
             merged_all=pd.concat([histdata,recentdata])
         if i>1:
