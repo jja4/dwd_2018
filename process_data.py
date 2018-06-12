@@ -78,6 +78,7 @@ def clean_merged(merged):
     merged_clean = merged_clean.drop(['eor'],axis=1)
     merged_clean.columns = [c.strip().lower() for c in merged_clean.columns]
     merged_clean['mess_datum'] = pd.to_datetime(merged_clean['mess_datum'].apply(str))
-    merged_clean = merged_clean.drop_duplicates()
+    merged_clean = merged_clean.drop_duplicates(subset = ['stations_id', 'mess_datum'], keep='first')
+    merged_clean['mess_datum'] = merged_clean['mess_datum'].apply(lambda x: x.date())
 
     return merged_clean
