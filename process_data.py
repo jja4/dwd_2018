@@ -48,14 +48,28 @@ def merge_hisrec_hourly(userpath,stationnumber):
 
         histfile_tmp = os.path.join(histpath, "stundenwerte*")
         histfile_tmp += str(stationnumber).zfill(5)+'*/produkt*'
-        histfile = glob.glob(histfile_tmp)[0]
+        #histfile = glob.glob(histfile_tmp)[0]
+        histlist = glob.glob(histfile_tmp)
+        if histlist:
+            histfile = glob.glob(histfile_tmp)[0]
+            histdata = pd.read_table(histfile, sep=";", low_memory=False)
+        else:
+            histdata = []
+
 
         recfile_tmp = os.path.join(recpath, "stundenwerte*")
         recfile_tmp += str(stationnumber).zfill(5)+'*/produkt*'
-        recfile = glob.glob(recfile_tmp)[0]
+        #recfile = glob.glob(recfile_tmp)[0]
 
-        histdata = pd.read_table(histfile, sep=";", low_memory=False)
-        recentdata = pd.read_table(recfile, sep=";", low_memory=False)
+        reclist = glob.glob(recfile_tmp)
+        if reclist:
+            recfile = glob.glob(recfile_tmp)[0]
+            recentdata = pd.read_table(recfile, sep=";", low_memory=False)
+        else:
+            recentdata = []
+
+        #histdata = pd.read_table(histfile, sep=";", low_memory=False)
+        #recentdata = pd.read_table(recfile, sep=";", low_memory=False)
         if i==0:
             merged_all=pd.concat([histdata,recentdata])
         if i>1:
@@ -70,6 +84,7 @@ def clean_merged(merged):
     merged_clean = merged_clean.drop(['eor'],axis=1)
     merged_clean.columns = [c.strip().lower() for c in merged_clean.columns]
     merged_clean['mess_datum'] = pd.to_datetime(merged_clean['mess_datum'].apply(str))
-    merged_clean = merged_clean.drop_duplicates()
+    merged_clean = merged_clean.drop_duplicates(subset = ['stations_id', 'mess_datum'], keep='first')
+    merged_clean['mess_datum'] = merged_clean['mess_datum'].apply(lambda x: x.date())
 
     return merged_clean
