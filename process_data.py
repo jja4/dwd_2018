@@ -80,7 +80,10 @@ def merge_hisrec_hourly(userpath,stationnumber):
         if i==0:
             merged_all=pd.concat([histdata,recentdata])
         else:
-            merged_all = merged_all.merge(pd.concat([histdata,recentdata]), on='MESS_DATUM', how='outer')
+            folderdata = pd.concat([histdata,recentdata])
+            if not folderdata.empty:
+                folderdata = folderdata.drop(['STATIONS_ID'],axis=1)
+            merged_all = merged_all.merge(folderdata, on='MESS_DATUM', how='outer')
 
     return merged_all
 
