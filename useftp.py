@@ -1,5 +1,5 @@
 from ftplib import FTP
-import os, sys
+import os, sys, time
 
 #prettify the progressbar
 try:
@@ -12,9 +12,42 @@ progress_bar_width = console_width - 6
 
 server = "ftp-cdc.dwd.de"
 
-def download_folder(ftp, userpath,foldername, verbose):
+def get_modification_time(ftp):
+    """
+    For a directory on the server get a list of filenames and the modification
+    date. Time format is like 'Tue May 29 10:03:06 2018'
+    """
+    mtimes = list()
     filenames = ftp.nlst(foldername)
     for i, filename in enumerate(filenames):
+        mtimes.append(filename,time.ctime(os.path.getmtime(filename)))
+    return mtimes
+
+def compare_modification_times(mtimes,filepath):
+    """
+    Write the filenames and date modified of the contents of a directory on the
+    server to a file for comparison later.
+    """
+    with open filepath as save_file:
+
+def open_mod_dates(filename):
+    # open the file containing the modified stamps of all the files that have
+    # already been downloaded
+    pass
+
+def get_mod_date():
+    # get modified stamp of a file thats is candidate for download
+    pass
+
+def save_mod_dates(mod_dates,filename):
+    # write list of mod dates to file
+    pass
+
+def download_folder(ftp, userpath,foldername, verbose):
+    filenames = ftp.nlst(foldername)
+    mod_dates = open_mod_dates()
+    for i, filename in enumerate(filenames):
+        if mod_dates[filename] == get_mod_date(): continue
         local_filename = os.path.join(userpath, filename)
         file = open(local_filename, 'wb')
         ftp.retrbinary('RETR '+ filename, file.write)
@@ -23,11 +56,7 @@ def download_folder(ftp, userpath,foldername, verbose):
             # what this actually does is to overwrite the last printout that was the statusbar
             # the ljust method pads the string with whitespaces, this is needed to remove
             # the previous statusbar
-            to_print = "downloaded {}".format(filename)
-            fill_diff = console_width-len(to_print)
-            if fill_diff>0:
-                to_print+=' '*fill_diff
-            sys.stdout.write(to_print)
+            sys.stdout.write(("downloaded {}".format(filename)).ljust(console_width))
             sys.stdout.write('\n')
             sys.stdout.flush()
         perc = int(100*i/len(filenames))
@@ -36,6 +65,7 @@ def download_folder(ftp, userpath,foldername, verbose):
         sys.stdout.flush()
     sys.stdout.write("[{}] {}%\n".format('='*(progress_bar_width-1), 100)) #write bar with 100%
     sys.stdout.flush()
+    save_mod_dates(mod_dates,os.path.join(userpath,'mod_dates'))
 
 def delete_folder(folder, verbose = True):
     for file in os.listdir(folder):

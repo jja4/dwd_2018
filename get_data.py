@@ -20,17 +20,17 @@ def get_data(userpath, historical, recent, hourly, verbose):
     if historical or recent:
         localdir = os.path.join(userpath,'pub','CDC','observations_germany','climate','daily','kl')
         if historical:
-            unzip_folder(os.path.join(localdir, 'historical'))
+            unzip_folder(os.path.join(localdir, 'historical'),verbose=verbose)
         if recent:
-            unzip_folder(os.path.join(localdir, 'recent'))
+            unzip_folder(os.path.join(localdir, 'recent'),verbose=verbose)
 
     if hourly:
         hour_folders = ["air_temperature", "cloud_type", "precipitation", "pressure", "soil_temperature", "solar", "sun", "visibility", "wind"]
         for folder in hour_folders:
             localdir = os.path.join(userpath, 'pub','CDC','observations_germany','climate','hourly', folder)
             if folder!="solar":
-                unzip_folder(os.path.join(localdir, 'historical'))
-                unzip_folder(os.path.join(localdir, 'recent'))
+                unzip_folder(os.path.join(localdir, 'historical'),verbose=verbose)
+                unzip_folder(os.path.join(localdir, 'recent'),verbose=verbose)
             else:
                 unzip_folder(localdir)
 
